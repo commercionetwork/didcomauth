@@ -61,6 +61,10 @@ func resolveDDO(lcd string, did string) (ddoResolveResponse, error) {
 		return ddoResolveResponse{}, fmt.Errorf("could not resolve DDO, %w", err)
 	}
 
+	if data.StatusCode == http.StatusNotFound {
+		return ddoResolveResponse{}, fmt.Errorf("ddo for %s not found", did)
+	}
+
 	if data.StatusCode != http.StatusOK {
 		return ddoResolveResponse{}, fmt.Errorf("LCD node responded with status %d", data.StatusCode)
 	}
@@ -70,6 +74,10 @@ func resolveDDO(lcd string, did string) (ddoResolveResponse, error) {
 	err = jdec.Decode(&drr)
 	if err != nil {
 		return ddoResolveResponse{}, fmt.Errorf("could not unmarshal DDO, %w", err)
+	}
+
+	if drr.Result.DidDocument == nil {
+		return ddoResolveResponse{}, errors.New("ddo resolution okay but document is empty")
 	}
 
 	_ = data.Body.Close()

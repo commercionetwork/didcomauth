@@ -1,10 +1,13 @@
 package didcomauth
 
 import (
+	"errors"
 	"fmt"
-	"reflect"
+	"net/http"
 	"testing"
 	"time"
+
+	"github.com/jarcoal/httpmock"
 
 	idKeeper "github.com/commercionetwork/commercionetwork/x/id/keeper"
 
@@ -145,28 +148,73 @@ func Test_ddoURL(t *testing.T) {
 }
 
 func Test_resolveDDO(t *testing.T) {
-	type args struct {
-		lcd string
-		did string
-	}
+	lcd := "lcd"
+	did := "did"
+
+	mockUrl := ddoURL(lcd, did)
+
+	okayDidDocument := testDidDocument()
+
 	tests := []struct {
-		name    string
-		args    args
-		want    ddoResolveResponse
-		wantErr bool
+		name      string
+		responder httpmock.Responder
+		wantErr   bool
 	}{
-		// TODO: Add test cases.
+		{
+			"http call goes error",
+			httpmock.NewErrorResponder(errors.New("error!")),
+			true,
+		},
+		{
+			"lcd returns non-200",
+			httpmock.NewStringResponder(http.StatusInternalServerError, "internal server error"),
+			true,
+		},
+		{
+			"ddo for did not found",
+			httpmock.NewStringResponder(http.StatusNotFound, "not found"),
+			true,
+		},
+		{
+			"wrong json",
+			httpmock.NewStringResponder(http.StatusOK, "this is not json"),
+			true,
+		},
+		{
+			"okay response",
+			httpmock.NewJsonResponderOrPanic(http.StatusOK, ddoResolveResponse{
+				Result: idKeeper.ResolveIdentityResponse{
+					DidDocument: &okayDidDocument,
+				}}),
+			false,
+		},
+		{
+			"okay response but diddocument is nil",
+			httpmock.NewJsonResponderOrPanic(http.StatusOK, ddoResolveResponse{
+				Result: idKeeper.ResolveIdentityResponse{
+					DidDocument: nil,
+				}}),
+			true,
+		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := resolveDDO(tt.args.lcd, tt.args.did)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("resolveDDO() error = %v, wantErr %v", err, tt.wantErr)
+			httpmock.Activate()
+			defer httpmock.DeactivateAndReset()
+
+			httpmock.RegisterResponder(http.MethodGet, mockUrl, tt.responder)
+
+			ddo, err := resolveDDO(lcd, did)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				require.Nil(t, ddo.Result.DidDocument)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("resolveDDO() got = %v, want %v", got, tt.want)
-			}
+
+			require.NoError(t, err)
+			require.NotNil(t, ddo.Result.DidDocument)
 		})
 	}
 }

@@ -15,7 +15,15 @@ func TestConfig_Validate(t *testing.T) {
 	}{
 		{
 			"no jwt secret",
-			Config{},
+			Config{
+				ProtectedPaths: []ProtectedMapping{
+					{
+						Methods: []string{http.MethodGet},
+						Path:    "/get",
+						Handler: nil,
+					},
+				},
+			},
 			true,
 		},
 		{
@@ -49,6 +57,21 @@ func TestConfig_Validate(t *testing.T) {
 					},
 				},
 				CacheType: CacheTypeMemory,
+			},
+			false,
+		},
+		{
+			"basic fields present with redis",
+			Config{
+				JWTSecret: "secret",
+				ProtectedPaths: []ProtectedMapping{
+					{
+						Methods: []string{http.MethodGet},
+						Path:    "/get",
+						Handler: nil,
+					},
+				},
+				CacheType: CacheTypeRedis,
 			},
 			false,
 		},

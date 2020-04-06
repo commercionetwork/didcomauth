@@ -11,6 +11,7 @@ import (
 const authHeader = "Authorization"
 
 var invalidTokenError = errors.New("invalid token")
+var notAuthorized = errors.New("not authorized")
 
 // checkAuth is a wrapper type used to easily test the JWT authentication
 type checkAuth struct {
@@ -24,14 +25,19 @@ func (c checkAuth) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	resource := req.Header.Get(ResourceHeader)
 
 	if ah == "" {
-		writeError(w, http.StatusForbidden, errors.New("not authorized"))
+		writeError(w, http.StatusForbidden, notAuthorized)
 		return
 	}
 
 	bearer := getBearer(ah)
 
+	if bearer == "" {
+		writeError(w, http.StatusForbidden, notAuthorized)
+		return
+	}
+
 	token, tokenError := jwt.Parse(bearer, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		if tt, ok := token.Method.(*jwt.SigningMethodHMAC); !ok || tt.Name != "HS512" {
 			return nil, invalidTokenError
 		}
 
@@ -70,5 +76,9 @@ func (r *router) checkAuthMiddleware(next http.Handler) http.Handler {
 }
 
 func getBearer(b string) string {
+	if !strings.HasPrefix(b, "Bearer ") {
+		return ""
+	}
+
 	return strings.TrimPrefix(b, "Bearer ")
 }

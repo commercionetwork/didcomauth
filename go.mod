@@ -12,7 +12,7 @@ require (
 	github.com/go-redis/redis/v7 v7.2.0 // indirect
 	github.com/gorilla/handlers v1.4.2 // indirect
 	github.com/gorilla/mux v1.7.4
-	github.com/jarcoal/httpmock v1.0.5 // indirect
+	github.com/jarcoal/httpmock v1.0.5
 	github.com/stretchr/testify v1.5.1
 	github.com/stumble/gorocksdb v0.0.3 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20190923125748-758128399b1d

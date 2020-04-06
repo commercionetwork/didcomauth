@@ -41,6 +41,8 @@ type AuthResponse struct {
 // Validate checks that AuthResponse is valid and does not contains bogus data.
 func (ar AuthResponse) Validate() error {
 	switch {
+	case ar.Challenge.Challenge == "":
+		return errors.New("challenge field empty")
 	case ar.Response == "":
 		return errors.New("response field empty")
 	case ar.DID == "":
