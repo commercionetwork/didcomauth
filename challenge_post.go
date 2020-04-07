@@ -67,7 +67,7 @@ func (r *router) challengePOSTHandler(rw http.ResponseWriter, req *http.Request)
 	// decode base64 response to bytes
 	rb, err := ar.ResponseBytes()
 	if err != nil {
-		writeError(rw, http.StatusBadRequest, errors.New("request format invalid"))
+		writeError(rw, http.StatusBadRequest, errors.New("response format invalid"))
 		return
 	}
 
