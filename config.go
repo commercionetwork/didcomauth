@@ -8,14 +8,16 @@ import (
 type CacheType int
 
 const (
+	CacheTypeRedis CacheType = iota
+	CacheTypeMemory
+)
+
+const (
 	defaultRedisHost     = "localhost:6379"
 	defaultAuthPath      = "/auth"
 	defaultChallengePath = "/challenge"
 	defaultProtectedPath = "/protected"
 	defaultCommercioLCD  = "http://localhost:1317"
-
-	CacheTypeRedis CacheType = iota
-	CacheTypeMemory
 )
 
 // ProtectedMapping represents a URI resource handled under the DID-authenticated protected path.
