@@ -43,7 +43,7 @@ func TestConfig_Validate(t *testing.T) {
 					},
 				},
 			},
-			true,
+			false,
 		},
 		{
 			"basic fields present",
