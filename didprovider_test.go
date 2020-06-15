@@ -27,7 +27,7 @@ func testDidDocument() types.DidDocument {
 	return types.DidDocument{
 		Context: "https://www.w3.org/ns/did/v1",
 		ID:      testOwnerAddress,
-		Proof: types.Proof{
+		Proof: &types.Proof{
 			Type:               "EcdsaSecp256k1VerificationKey2019",
 			Created:            testTime,
 			ProofPurpose:       "authentication",
@@ -40,7 +40,7 @@ func testDidDocument() types.DidDocument {
 				ID:         fmt.Sprintf("%s#keys-1", testOwnerAddress),
 				Type:       "RsaVerificationKey2018",
 				Controller: testOwnerAddress,
-				PublicKey: `-----BEGIN PUBLIC KEY-----
+				PublicKeyPem: `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqOoLR843vgkFGudQsjch
 2K85QJ4Hh7l2jjrMesQFDWVcW1xr//eieGzxDogWx7tMOtQ0hw77NAURhldek1Bh
 Co06790YHAE97JqgRQ+IR9Dl3GaGVQ2WcnknO4B1cvTRJmdsqrN1Bs4Qfd+jjKIM
@@ -54,7 +54,7 @@ GwIDAQAB
 				ID:         fmt.Sprintf("%s#keys-2", testOwnerAddress),
 				Type:       "RsaSignatureKey2018",
 				Controller: testOwnerAddress,
-				PublicKey: `-----BEGIN PUBLIC KEY-----
+				PublicKeyPem: `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+Juw6xqYchTNFYUznmoB
 CzKfQG75v2Pv1Db1Z5EJgP6i0yRsBG1VqIOY4icRnyhDDVFi1omQjjUuCRxWGjsc
 B1UkSnybm0WC+g82HL3mUzbZja27NFJPuNaMaUlNbe0daOG88FS67jq5J2LsZH/V
@@ -74,10 +74,10 @@ func Test_ddoResolveResponse_SigningPubKey(t *testing.T) {
 
 	wrongDDO := testDidDocument()
 	wrongDDO.PubKeys[1] = types.PubKey{
-		ID:         "did:com:12p24st9asf394jv04e8sxrl9c384jjqwejv0gf#keys-2",
-		Type:       "",
-		Controller: nil,
-		PublicKey:  "",
+		ID:           "did:com:12p24st9asf394jv04e8sxrl9c384jjqwejv0gf#keys-2",
+		Type:         "",
+		Controller:   nil,
+		PublicKeyPem: "",
 	}
 
 	tests := []struct {

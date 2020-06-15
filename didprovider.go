@@ -25,7 +25,7 @@ func (drr ddoResolveResponse) SigningPubKey() (*rsa.PublicKey, error) {
 	rawKeyStr := ""
 	for _, k := range drr.Result.DidDocument.PubKeys {
 		if strings.HasSuffix(k.ID, "#keys-2") {
-			rawKeyStr = k.PublicKey
+			rawKeyStr = k.PublicKeyPem
 		}
 	}
 
